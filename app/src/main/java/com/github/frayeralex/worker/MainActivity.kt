@@ -1,12 +1,14 @@
 package com.github.frayeralex.worker
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import androidx.work.*
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.github.frayeralex.worker.workers.PrimeCalculationWorker
 import kotlinx.android.synthetic.main.activity_main.*
-import androidx.lifecycle.Observer
 
 class MainActivity : AppCompatActivity() {
     private val wm by lazy { WorkManager.getInstance(this) }
@@ -15,6 +17,21 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        if (savedInstanceState is Bundle && savedInstanceState.containsKey(LAST_PRIME_INT)) {
+            Toast.makeText(
+                this,
+                "LAST PRIME NUMBER :" + savedInstanceState.getInt(LAST_PRIME_INT).toString(),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        if (primeList.isNotEmpty()) {
+            outState.putInt(LAST_PRIME_INT, primeList.get(primeList.lastIndex))
+        }
+        super.onSaveInstanceState(outState)
     }
 
     fun startCalculation(v: View) {
@@ -37,30 +54,22 @@ class MainActivity : AppCompatActivity() {
 
     fun stopCalculation(v: View) {
         wm.cancelAllWorkByTag(TAG)
-        primeList.clear()
-        updateUi()
-    }
-
-    override fun onDestroy() {
-        wm.cancelAllWork()
-        super.onDestroy()
     }
 
     private fun updateUi() {
         if (primeList.isNotEmpty()) {
-            displayImage(primeList[primeList.size - 1].toString())
-        } else {
-            displayImage(resources.getString(R.string.app_name))
+            displayImage(primeList[primeList.lastIndex].toString())
         }
     }
 
     private fun displayImage(text: String) {
-        textView.text = text;
+        textView.text = text
 
     }
 
     companion object {
         private val TAG = "CALC_VALUE"
         private val DEFAULT_VALUE = 1
+        private val LAST_PRIME_INT = "LAST_PRIME_INT"
     }
 }

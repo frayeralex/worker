@@ -1,9 +1,9 @@
 package com.github.frayeralex.worker.workers
 
 import android.content.Context
-import android.util.Log
-import androidx.work.*
-import java.lang.Exception
+import androidx.work.Data
+import androidx.work.Worker
+import androidx.work.WorkerParameters
 import java.util.concurrent.TimeUnit
 
 class PrimeCalculationWorker (appContext: Context, workerParams: WorkerParameters)
@@ -14,10 +14,9 @@ class PrimeCalculationWorker (appContext: Context, workerParams: WorkerParameter
         while (!this.isStopped) {
             if (isPrime(currentCheckInt)) {
                 setProgressAsync(Data.Builder().putInt(PROGRESS, currentCheckInt).build())
-                Log.d("FOO", currentCheckInt.toString())
+                TimeUnit.MILLISECONDS.sleep(500)
             }
-            TimeUnit.MILLISECONDS.sleep(100)
-            currentCheckInt++;
+            currentCheckInt++
         }
         return Result.success()
     }
